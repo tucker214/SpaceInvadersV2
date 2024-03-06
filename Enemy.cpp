@@ -567,6 +567,26 @@ void Enemy::update_death_timer()
 	m_death_timer = SDL_GetTicks();
 }
 
+Mix_Chunk* Enemy::get_mix_chunk1() const
+{
+	return move_sound_1;
+}
+
+Mix_Chunk* Enemy::get_mix_chunk2() const
+{
+	return move_sound_2;
+}
+
+Mix_Chunk* Enemy::get_mix_chunk3() const
+{
+	return move_sound_3;
+}
+
+Mix_Chunk* Enemy::get_mix_chunk4() const
+{
+	return move_sound_4;
+}
+
 void Enemy::update_enemy_array(Uint32& time_begin, const int& casualties)
 {
 

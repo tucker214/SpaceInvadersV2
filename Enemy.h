@@ -49,6 +49,10 @@ public:
 	void decrement_shoot_timer();
 	unsigned int get_death_timer() const;
 	void update_death_timer();
+	Mix_Chunk* get_mix_chunk1() const;
+	Mix_Chunk* get_mix_chunk2() const;
+	Mix_Chunk* get_mix_chunk3() const;
+	Mix_Chunk* get_mix_chunk4() const;
 
 private:
 	static LTexture* s_enemy_sprite_sheet;

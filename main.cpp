@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
 	SDL_QuitSubSystem(SDL_INIT_AUDIO);
 	SDL_QuitSubSystem(IMG_INIT_JPG);
 	SDL_QuitSubSystem(IMG_INIT_PNG);
+	Mix_Quit();
 	TTF_Quit();
 	SDL_Quit();
 	return 0;

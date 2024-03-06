@@ -5,6 +5,7 @@
 #include "Game.h"
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 
 
 constexpr int WIDTH = 1920;
@@ -60,7 +61,8 @@ void init_main()
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) < 0){ printf("SDL could not be initialized. Error: %s", SDL_GetError()); }
 	if (IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG) == 0) { printf("SDL_image could not be initialized. Error: %s", SDL_GetError()); }
 	if (TTF_Init() < 0) { printf("SDL TTF could not be initialized. Error: %s", SDL_GetError()); }
-	
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) { printf("Couldn't initialize SDL Mixer. Error: %s", SDL_GetError()); }
+
 	Window::get().create_window("Space Invaders", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
 	Render::create_renderer();
 

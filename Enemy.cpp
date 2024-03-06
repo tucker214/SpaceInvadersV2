@@ -510,6 +510,14 @@ int Enemy::get_enemy_type() const
 	return m_type;
 }
 
+void Enemy::setup_move_sound()
+{
+	if (!move_sound_1) { move_sound_1 = Mix_LoadWAV("assets/audio/fastinvader1.wav"); }
+	if (!move_sound_2) { move_sound_2 = Mix_LoadWAV("assets/audio/fastinvader2.wav"); }
+	if (!move_sound_3) { move_sound_3 = Mix_LoadWAV("assets/audio/fastinvader3.wav"); }
+	if (!move_sound_4) { move_sound_4 = Mix_LoadWAV("assets/audio/fastinvader4.wav"); }
+}
+
 void Enemy::set_x_increment(int x_delta)
 {
 
@@ -582,6 +590,29 @@ void Enemy::update_enemy_array(Uint32& time_begin, const int& casualties)
 	if (time_now - time_begin >= enemy_movement_interval)
 	{
 		shift_formation(enemy_arr);
+		switch (loop_move_sound)
+		{
+		case 1: 
+			Mix_PlayChannel(-1, move_sound_1, 0);
+			loop_move_sound = loop_move_sound % 4 + 1;
+			break;
+		case 2:
+			Mix_PlayChannel(-1, move_sound_2, 0);
+			loop_move_sound = loop_move_sound % 4 + 1;
+			break;
+		case 3:
+			Mix_PlayChannel(-1, move_sound_3, 0);
+			loop_move_sound = loop_move_sound % 4 + 1;
+			break;
+		case 4:
+			Mix_PlayChannel(-1, move_sound_4, 0);
+			loop_move_sound = loop_move_sound % 4 + 1;
+			break;
+
+		default:
+			break;
+		}
+
 		alternate_texture = !alternate_texture;
 
 		

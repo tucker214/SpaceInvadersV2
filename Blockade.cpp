@@ -175,7 +175,7 @@ void Blockade::set_destroyed_block(SDL_Rect* destroyed_block)
 void Blockade::is_within_blast_range(SDL_Rect* nearby_block)
 {
 	//const int screen_ratio = Window::win_surface()->h / Window::win_surface()->w;
-	int destroy_range_x = Window::win_surface()->w / 175;
+	int destroy_range_x = Window::win_surface()->w / 100;
 	int destroy_range_y = destroy_range_x * 2;
 	if (destroy_range_x == 0) { destroy_range_x = 1; destroy_range_y = 1; }
 
@@ -201,6 +201,7 @@ void Blockade::clean_blockade_vector()
 			if (m_blockade_vector[index]->x <= -1000)
 			{
 				delete m_blockade_vector[index];
+				m_blockade_vector[index] = nullptr;
 				m_blockade_vector.erase(m_blockade_vector.begin() + index);
 			}
 

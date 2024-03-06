@@ -1,4 +1,5 @@
 #pragma once
+#include <SDL_mixer.h>
 #include <SDL_rect.h>
 #include <SDL_stdinc.h>
 #include <vector>
@@ -41,6 +42,7 @@ public:
 	void increment_y_position();
 	int get_enemy_score() const;
 	int get_enemy_type() const;
+	void setup_move_sound();
 	void set_x_increment(int x_delta);
 	void set_y_increment(int y_delta);
 	void random_enemy_shoot();
@@ -50,12 +52,17 @@ public:
 
 private:
 	static LTexture* s_enemy_sprite_sheet;
+	Mix_Chunk* move_sound_1;
+	Mix_Chunk* move_sound_2;
+	Mix_Chunk* move_sound_3;
+	Mix_Chunk* move_sound_4;
 	SDL_Rect* m_image_rect;
 	int m_shooting_cooldown = 0;
 	int m_increment_x_amount;
 	int m_increment_y_amount;
 	int m_score = 0;
 	int m_type = 0;
+	int loop_move_sound = 4;
 	unsigned int m_death_timer = 0;
 };
 

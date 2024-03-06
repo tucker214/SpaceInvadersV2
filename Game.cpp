@@ -56,7 +56,7 @@ Game::Game()
 	enemy_timer = SDL_GetTicks();
 	Enemy::format_formation(Enemy::enemy_arr);
 	m_enemies->is_moving_right = true;
-
+	m_enemies->setup_move_sound();
 	m_UFO = nullptr;
 
 	m_UFO_power_up = nullptr;
@@ -168,7 +168,11 @@ void Game::update()
 	}
 
 	if (m_texture_text) { SDL_DestroyTexture(m_texture_text); m_texture_text = nullptr; }
-	
+
+	m_blockade_1->clean_blockade_vector();
+	m_blockade_2->clean_blockade_vector();
+	m_blockade_3->clean_blockade_vector();
+	m_blockade_4->clean_blockade_vector();
 }
 
 void Game::render()
@@ -193,27 +197,20 @@ void Game::render()
 		if(m_blockade_3){ m_blockade_3->render(); }
 		if(m_blockade_4){ m_blockade_4->render(); }
 
-		for (Projectile*& projectile : Projectile::get_player_projectiles_vector())
+		for (Projectile*& projectile : Projectile::get_player_projectiles_vector()) { if (projectile) { projectile->render_projectile(); } }
+		for (Projectile*& projectile : Projectile::get_enemy_projectiles_vector()) { if (projectile) { projectile->render_projectile(); } }
+		for (int index = s_player->get_lives(); index > 0; index--)
 		{
-			if (projectile) { projectile->render_projectile(); }
+			Render::render_sprite(s_player->get_l_texture(), static_cast<int>(Window::win_surface()->w * (18 + 1.4 * index) / 25), Window::win_surface()->h / 25);
 		}
 
-		for (Projectile*& projectile : Projectile::get_enemy_projectiles_vector())
+		if (s_player) { if (s_player->get_projectile_power_timer() > 0) { Render::render_rect(s_player->get_power_up_bar(), SDL_Color{ 0, 150, 255, 30}); } }
+
+		if (!m_player_died)
 		{
-			if (projectile) { projectile->render_projectile(); }
+			Render::render_sprite(s_player->get_l_texture(), s_player->get_x_pos(), s_player->get_y_pos());
 		}
-
-
-		for (int index = s_player->get_lives(); index > 0; index--) { Render::render_sprite(s_player->get_l_texture(), static_cast<int>(Window::win_surface()->w * (18 + 1.4 * index) / 25), Window::win_surface()->h / 25); }
-
-		if (s_player)
-			if (s_player->get_projectile_power_timer() > 0) { Render::render_rect(s_player->get_power_up_bar(), SDL_Color{ 0, 150, 255, 30}); }
-
-
-
-		if (!m_player_died) { Render::render_sprite(s_player->get_l_texture(), s_player->get_x_pos(), s_player->get_y_pos()); }
 		else { render_player_death(); }
-
 
 		SDL_RenderPresent(Render::get_renderer()); //RenderPresent must always be the last render operation
 
@@ -434,21 +431,20 @@ void Game::collision()
 		if (m_blockade_1)
 		{
 
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_1->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_1->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_1->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_1->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_1->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_1->get_blockade_vector().begin(), m_blockade_1->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
 
 								if (blockade_rect_index < static_cast<int>(m_blockade_1->get_blockade_vector().size()))
 								{
@@ -476,7 +472,7 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_1->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
@@ -487,7 +483,7 @@ void Game::collision()
 			{
 				delete m_blockade_1;
 				m_blockade_1 = nullptr;
-				printf("m_blockade_4 deleted\n");
+				printf("m_blockade_1 deleted\n");
 			}
 		}
 
@@ -497,21 +493,21 @@ void Game::collision()
 		if (m_blockade_2)
 		{
 
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_2->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_2->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_2->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_2->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_2->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_2->get_blockade_vector().begin(), m_blockade_2->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
+
 								if (blockade_rect_index < static_cast<int>(m_blockade_2->get_blockade_vector().size()))
 								{
 									m_blockade_2->get_blockade_vector().erase(m_blockade_2->get_blockade_vector().begin() + blockade_rect_index);
@@ -520,6 +516,7 @@ void Game::collision()
 								{
 									printf("index exceeds blockade size\n");
 								}
+
 								projectile->set_health(0);
 							}
 						}
@@ -529,7 +526,7 @@ void Game::collision()
 							if (Projectile::get_player_projectiles_vector()[player_projectile_index])
 								player_projectile_index++;
 						}
-					
+
 					}
 
 					else
@@ -537,7 +534,7 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_2->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
@@ -548,7 +545,7 @@ void Game::collision()
 			{
 				delete m_blockade_2;
 				m_blockade_2 = nullptr;
-				printf("m_blockade_4 deleted\n");
+				printf("m_blockade_2 deleted\n");
 			}
 		}
 
@@ -558,21 +555,21 @@ void Game::collision()
 		if (m_blockade_3)
 		{
 
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_3->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_3->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_3->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_3->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_3->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_3->get_blockade_vector().begin(), m_blockade_3->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
+
 								if (blockade_rect_index < static_cast<int>(m_blockade_3->get_blockade_vector().size()))
 								{
 									m_blockade_3->get_blockade_vector().erase(m_blockade_3->get_blockade_vector().begin() + blockade_rect_index);
@@ -581,7 +578,6 @@ void Game::collision()
 								{
 									printf("index exceeds blockade size\n");
 								}
-
 
 								projectile->set_health(0);
 							}
@@ -592,7 +588,7 @@ void Game::collision()
 							if (Projectile::get_player_projectiles_vector()[player_projectile_index])
 								player_projectile_index++;
 						}
-					
+
 					}
 
 					else
@@ -600,7 +596,7 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_3->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
@@ -611,7 +607,7 @@ void Game::collision()
 			{
 				delete m_blockade_3;
 				m_blockade_3 = nullptr;
-				printf("m_blockade_4 deleted\n");
+				printf("m_blockade_3 deleted\n");
 			}
 		}
 
@@ -621,21 +617,21 @@ void Game::collision()
 		if (m_blockade_4)
 		{
 
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_4->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_4->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_4->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_4->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_4->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_4->get_blockade_vector().begin(), m_blockade_4->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
+
 								if (blockade_rect_index < static_cast<int>(m_blockade_4->get_blockade_vector().size()))
 								{
 									m_blockade_4->get_blockade_vector().erase(m_blockade_4->get_blockade_vector().begin() + blockade_rect_index);
@@ -654,7 +650,7 @@ void Game::collision()
 							if (Projectile::get_player_projectiles_vector()[player_projectile_index])
 								player_projectile_index++;
 						}
-						
+
 					}
 
 					else
@@ -662,7 +658,7 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_4->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
@@ -684,21 +680,20 @@ void Game::collision()
 		if (m_blockade_1)
 		{
 
-			for (const auto& projectile : Projectile::get_enemy_projectiles_vector())
+			for (const auto projectile : Projectile::get_enemy_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_1->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_1->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_1->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_1->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_1->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_1->get_blockade_vector().begin(), m_blockade_1->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
 
 								if (blockade_rect_index < static_cast<int>(m_blockade_1->get_blockade_vector().size()))
 								{
@@ -726,14 +721,12 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_1->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
 				blockade_rect_index = 0;
 			}
-
-			m_blockade_1->clean_blockade_vector();
 
 			if (m_blockade_1->get_blockade_vector().empty())
 			{
@@ -749,21 +742,20 @@ void Game::collision()
 		if (m_blockade_2)
 		{
 
-			for (const auto& projectile : Projectile::get_enemy_projectiles_vector())
+			for (const auto projectile : Projectile::get_enemy_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_2->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_2->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_2->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_2->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_2->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_2->get_blockade_vector().begin(), m_blockade_2->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
 
 								if (blockade_rect_index < static_cast<int>(m_blockade_2->get_blockade_vector().size()))
 								{
@@ -791,14 +783,12 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_2->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
 				blockade_rect_index = 0;
 			}
-
-			m_blockade_2->clean_blockade_vector();
 
 			if (m_blockade_2->get_blockade_vector().empty())
 			{
@@ -814,21 +804,20 @@ void Game::collision()
 		if (m_blockade_3)
 		{
 
-			for (const auto& projectile : Projectile::get_enemy_projectiles_vector())
+			for (const auto projectile : Projectile::get_enemy_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_3->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_3->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_3->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_3->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_3->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_3->get_blockade_vector().begin(), m_blockade_3->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
 
 								if (blockade_rect_index < static_cast<int>(m_blockade_3->get_blockade_vector().size()))
 								{
@@ -856,14 +845,12 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_3->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
 				blockade_rect_index = 0;
 			}
-
-			m_blockade_3->clean_blockade_vector();
 
 			if (m_blockade_3->get_blockade_vector().empty())
 			{
@@ -879,21 +866,20 @@ void Game::collision()
 		if (m_blockade_4)
 		{
 
-			for (const auto& projectile : Projectile::get_enemy_projectiles_vector())
+			for (const auto projectile : Projectile::get_enemy_projectiles_vector())
 			{
-				for (auto& blockade_rects : m_blockade_4->get_blockade_vector())
+				for (blockade_rect_index = 0; blockade_rect_index < static_cast<int>(m_blockade_4->get_blockade_vector().size() - 1);)
 				{
 					if (projectile)
 					{
-						if (blockade_rects)
+						if (m_blockade_4->get_blockade_vector()[blockade_rect_index])
 						{
-							if (Collision::is_colliding(projectile->get_projectile_rect(), blockade_rects))
+							if (Collision::is_colliding(projectile->get_projectile_rect(), m_blockade_4->get_blockade_vector()[blockade_rect_index]))
 							{
-								Blockade::set_destroyed_block(blockade_rects);
+								Blockade::set_destroyed_block(m_blockade_4->get_blockade_vector()[blockade_rect_index]);
 								std::for_each(m_blockade_4->get_blockade_vector().begin(), m_blockade_4->get_blockade_vector().end(), &Blockade::is_within_blast_range);
 								Blockade::set_destroyed_block(nullptr);
-								delete blockade_rects;
-								blockade_rects = nullptr;
+
 
 								if (blockade_rect_index < static_cast<int>(m_blockade_4->get_blockade_vector().size()))
 								{
@@ -921,14 +907,12 @@ void Game::collision()
 						break;
 					}
 
-					if (blockade_rects) { blockade_rect_index++; }
+					if (m_blockade_4->get_blockade_vector()[blockade_rect_index]) { blockade_rect_index++; }
 
 				}
 
 				blockade_rect_index = 0;
 			}
-
-			m_blockade_4->clean_blockade_vector();
 
 			if (m_blockade_4->get_blockade_vector().empty())
 			{

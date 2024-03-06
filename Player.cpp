@@ -120,7 +120,7 @@ bool Player::b_destroy_projectile()
 
 void Player::handle_input(int window_width)
 {
-	int movement_speed = Window::win_surface()->w / Window::get_window_divisions() / 35;
+	int movement_speed = Window::win_surface()->w / Window::get_window_divisions() / 20;
 	if (movement_speed < 1) { movement_speed = 1; }
 
 	const auto key_states = SDL_GetKeyboardState(nullptr);
@@ -159,13 +159,6 @@ void Player::handle_input(int window_width)
 void Player::update(unsigned& game_timer)
 {
 	handle_input(SDL_GetWindowSurface(Window::get_window())->w);
-	//if (m_player_projectile)
-	//{
-	//	if (m_player_projectile->get_projectile_rect())
-	//		m_player_projectile->increment_projectile();
-	//}
-	//b_destroy_projectile();
-	//shoot();
 	if (!Projectile::get_player_projectiles_vector().empty())
 	{
 		for (const auto& projectile : Projectile::get_player_projectiles_vector())

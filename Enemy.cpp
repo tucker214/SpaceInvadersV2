@@ -545,8 +545,9 @@ void Enemy::random_enemy_shoot()
 	if (enemy->m_shooting_cooldown <= 0)
 	{
 		Projectile::load_projectile(enemy, Projectile::get_enemy_projectiles_vector(), Projectile::SINGLE);
+		Projectile::get_enemy_projectiles_vector().back()->set_projectile_velocity(Window::win_surface()->h / 220);
 		Projectile::get_enemy_projectiles_vector().back()->shoot();
-		enemy->m_shooting_cooldown = 2000;
+		enemy->m_shooting_cooldown = 1200;
 	}
 
 

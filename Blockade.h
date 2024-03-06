@@ -21,7 +21,6 @@ public:
 	int get_surface_width() const;
 	int get_min_x_pos() const;
 	int get_max_x_pos() const;
-	static void destroy_blockade_pieces();
 	std::vector<SDL_Rect*>& get_blockade_vector();
 	void render();
 	static void set_destroyed_block(SDL_Rect* destroyed_block);

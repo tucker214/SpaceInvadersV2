@@ -1051,7 +1051,6 @@ void Game::collision()
 		Mix_FreeChunk(m_enemies->get_mix_chunk2());
 		Mix_FreeChunk(m_enemies->get_mix_chunk3());
 		Mix_FreeChunk(m_enemies->get_mix_chunk4());
-		//TTF_CloseFont(m_font);
 
 		delete m_UFO;
 		m_UFO = nullptr;

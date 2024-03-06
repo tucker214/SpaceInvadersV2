@@ -48,12 +48,14 @@ Projectile::Projectile(int projectile_type)
 
 Projectile::Projectile(SDL_Rect* projectile_rect, int projectile_type) :  m_projectile_type(projectile_type), m_is_active_projectile(false),  m_projectile_rect(projectile_rect)
 {
-	const int projectile_velocity = Window::win_surface()->h / 300;
+	const int projectile_velocity = Window::win_surface()->h / 180;
 	m_projectile_velocity = projectile_velocity;
 }
 
 Projectile::Projectile(SDL_Rect* projectile_rect, int projectile_type, int horizontal_delta) : m_projectile_type(projectile_type), m_is_active_projectile(false), m_projectile_velocity(3), m_horizontal_delta(horizontal_delta), m_projectile_rect(projectile_rect)
 {
+	const int projectile_velocity = Window::win_surface()->h / 180;
+	m_projectile_velocity = projectile_velocity;
 }
 
 

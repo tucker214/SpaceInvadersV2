@@ -34,7 +34,9 @@ Game::Game()
 	Player::set_sprite_sheet(LTexture::create_l_texture("assets/textures/ship_destroyed_sheet.png"));
 	m_surface_text = nullptr; //SDL_Surface for displaying score
 
+	m_font = nullptr;
 	load_font("assets/fonts/Retro Gaming.ttf");
+
 	s_is_game_finished = false;
 	s_is_game_won = false;
 
@@ -83,7 +85,6 @@ Game::Game()
 	m_blockade_2->search_surface_pixels();
 	m_blockade_3->search_surface_pixels();
 	m_blockade_4->search_surface_pixels();
-
 
 
 	UFO_creation_timer = game_timer = SDL_GetTicks();
@@ -150,7 +151,7 @@ void Game::update()
 				s_player_x_pos = s_player->get_x_pos();
 			}
 
-			for (Enemy*& enemy : Enemy::enemy_arr)
+			for (Enemy* enemy : Enemy::enemy_arr)
 			{
 				if (enemy)
 					enemy->decrement_shoot_timer();
@@ -187,7 +188,7 @@ void Game::render()
 		{
 			Render::render_enemy(m_UFO);
 		}
-		for (Enemy*& enemy_ptr : Enemy::enemy_arr) { if (enemy_ptr) { Render::render_enemy(enemy_ptr); } }
+		for (Enemy* enemy_ptr : Enemy::enemy_arr) { if (enemy_ptr) { Render::render_enemy(enemy_ptr); } }
 
 		if (m_UFO_power_up) { Render::render_sprite(m_UFO_power_up->get_l_texture(), m_UFO_power_up->get_x_pos(), m_UFO_power_up->get_y_pos()); }
 		render_score();
@@ -234,7 +235,7 @@ void Game::collision()
 		const int explosive_radius = Window::win_surface()->w / 9;
 		SDL_Rect temp_explosive;
 
-		for (auto& enemy_ptr : Enemy::enemy_arr)
+		for (auto enemy_ptr : Enemy::enemy_arr)
 		{
 			if (enemy_ptr)
 			{
@@ -269,7 +270,7 @@ void Game::collision()
 			{
 				if (projectile)
 				{
-					for (Enemy*& enemy_ptr : Enemy::enemy_arr)
+					for (Enemy* enemy_ptr : Enemy::enemy_arr)
 					{
 
 						if (enemy_ptr)
@@ -306,7 +307,7 @@ void Game::collision()
 
 		if (!Projectile::get_player_projectiles_vector().empty())
 		{
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
 				if (projectile)
 				{
@@ -325,7 +326,7 @@ void Game::collision()
 
 		if (!Projectile::get_player_projectiles_vector().empty())
 		{
-			for (const auto& projectile : Projectile::get_player_projectiles_vector())
+			for (const auto projectile : Projectile::get_player_projectiles_vector())
 			{
 				if (projectile)
 				{
@@ -958,7 +959,7 @@ void Game::collision()
 
 		if (s_player->get_projectile_type() == Projectile::EXPLOSIVE)
 		{
-			for (Enemy*& enemy_ptr : Enemy::enemy_arr)
+			for (Enemy* enemy_ptr : Enemy::enemy_arr)
 			{
 				if (enemy_ptr)
 				{
@@ -1094,7 +1095,11 @@ void Game::set_game_finished()
 void Game::load_font(const char* file_path)
 {
 	if (!m_font)
-		m_font = TTF_OpenFont(file_path, Window::win_surface()->w / 50);
+	{
+		int font_size = Window::win_surface()->w / 50;
+		if (font_size == 0) { font_size = 1; }
+		m_font = TTF_OpenFont(file_path, font_size);
+	}
 	
 	if (!m_font)
 	{
@@ -1117,8 +1122,8 @@ void Game::create_surface_from_font(const char* text)
 		m_surface_text = nullptr;
 
 	}
-	
-	m_surface_text = TTF_RenderText_Solid(m_font, text, SDL_Color{ 255, 255, 255, 255 });
+
+	 m_surface_text = TTF_RenderText_Solid(m_font, text, SDL_Color{255, 255, 255, 255});
 
 	if(!m_surface_text)
 	{
@@ -1146,11 +1151,8 @@ void Game::create_surface_from_font(const char* text)
 
 void Game::render_score()
 {
-
-	const std::string score_string = std::to_string(s_score);
-	const std::string score = "score: ";
-	const std::string temp = score + score_string;
-	create_surface_from_font(temp.c_str());
+	 
+	create_surface_from_font(("score: " + std::to_string(s_score)).c_str());
 	if (m_texture_text){ Render::render_score(m_texture_text); }
 }
 

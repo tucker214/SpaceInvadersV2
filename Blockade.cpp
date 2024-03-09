@@ -179,10 +179,12 @@ void Blockade::is_within_blast_range(SDL_Rect* nearby_block)
 	int destroy_range_y = destroy_range_x * 2;
 	if (destroy_range_x == 0) { destroy_range_x = 1; destroy_range_y = 1; }
 
+
 	if (!s_destroyed_block) { }
 
 	else if (abs(nearby_block->x - s_destroyed_block->x) < destroy_range_x)
 	{
+
 		if (abs(nearby_block->y - s_destroyed_block->y) < destroy_range_y)
 		{
 			
@@ -209,7 +211,6 @@ void Blockade::clean_blockade_vector()
 		}
 
 		else index++;
-
 	}
 }
 
